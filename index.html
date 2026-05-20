@@ -59,13 +59,13 @@
   <section class="section" id="overview" style="padding-top:4rem;">
     <div class="container">
       <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 1.25rem;">
-        Today's agentic systems &mdash; from prompted workflows to end-to-end trained policies, even reasoning LLMs like o1 and o3-mini &mdash; are fundamentally <strong>reactive</strong>: they pick the next action by pattern-matching the current observation, with at most undifferentiated chain-of-thought that lacks any explicit notion of future state. This works in narrow settings but does not transfer: each new task or environment demands re-engineering rather than the reuse of a shared reasoning capacity.
+        Today's agentic systems &mdash; prompted workflows, end-to-end policies, even reasoning LLMs like o1 and o3-mini &mdash; pick the next action <strong>reactively</strong>, with at most undifferentiated chain-of-thought. We argue that <strong style="color:#34a292;">simulative reasoning</strong> through a world model is a more general planning mechanism: at each step the agent proposes candidate actions, predicts their consequences, and commits to the one with the highest expected goal progress &mdash; transferring across tasks without per-environment re-engineering.
       </p>
       <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 2rem;">
-        We propose <strong style="color:#34a292;">SiRA</strong> (Simulative Reasoning Architecture), a goal-oriented architecture that augments reactive policies (System&nbsp;I) with explicit <em>simulative reasoning</em> (System&nbsp;II) through a world model: at each step, the agent proposes candidate actions, predicts their consequences in a natural-language belief space, scores how much each one advances the goal, and commits to the most promising one. Instantiated as a web-browsing agent, SiRA delivers up to <strong>124% higher task completion</strong> than a matched reactive baseline and raises constrained-navigation success from <strong>0% to 32.2%</strong> over a representative open-web agent &mdash; with the advantage persisting across three qualitatively distinct task categories, evidence that the gain stems from generalizable counterfactual evaluation rather than per-task tuning.
+        We instantiate this idea as <strong style="color:#34a292;">SiRA</strong> (Simulative Reasoning Architecture), a web-browsing agent that uses a pretrained LLM as the world model in natural-language belief space. Simulative reasoning delivers up to <strong>124% higher task completion</strong> than a matched reactive baseline and raises constrained-navigation success from <strong>0% to 32.2%</strong>, with the advantage persisting across three qualitatively distinct task categories.
       </p>
       <img src="figures/2.3.1-am-architecture-d2.png" alt="SiRA architecture: encoder produces a natural-language belief state; planner proposes actions, simulates next states via world model, scores with critic; actor outputs concrete action." style="width:64%;display:block;margin:0 auto;" />
-      <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:center;">SiRA at each step: the <em>encoder</em> maps the observation into a natural-language belief state; the <em>planner</em> proposes candidate actions, simulates their consequences via the <em>world model</em>, and evaluates goal progress via the <em>critic</em>; the best simulated action is then grounded by the <em>actor</em> as a concrete environment command.</p>
+      <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:left;">SiRA at each step: the <em>encoder</em> maps the observation into a natural-language belief state; the <em>planner</em> proposes candidate actions, simulates their consequences via the <em>world model</em>, and evaluates goal progress via the <em>critic</em>; the best simulated action is then grounded by the <em>actor</em> as a concrete environment command.</p>
     </div>
   </section>
 
@@ -98,11 +98,8 @@
   <section class="section" id="method">
     <div class="container">
       <h2 class="section-title">How SiRA Works</h2>
-      <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 1.25rem;">
-        Reactive policies pick the next action by pattern-matching the current observation. <strong>Simulative reasoning</strong>, by contrast, asks <em>what would happen if I took action <span style="font-family:var(--font-mono);">a</span> from state <span style="font-family:var(--font-mono);">s</span>?</em> &mdash; proposing candidate actions, predicting their consequences through a model of the environment, and selecting behavior grounded in those predictions. Because this operates by simulating state transitions rather than memorizing domain-specific responses, it transfers across tasks and environments without re-engineering.
-      </p>
       <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 2rem;">
-        <strong style="color:#34a292;">SiRA</strong> (Simulative Reasoning Architecture) realizes this principle with four modules. An <em>encoder</em> turns raw observations into a compact, natural-language belief state. A <em>planner</em> &mdash; combining a sampling <em>policy</em>, a <em>world model</em>, and a <em>critic</em> &mdash; expands a small tree of candidate futures over abstract actions, scores how much each one advances the goal, and selects the most promising next step. An <em>actor</em> then grounds the selected abstract action in a concrete, environment-specific command. SiRA's design is model-agnostic; in this work each module is instantiated with a pretrained LLM, with planning driven by tree search.
+        Where reactive policies pattern-match the next action from the current observation, <strong>simulative reasoning</strong> asks <em>what would happen if I took action <span style="font-family:var(--font-mono);">a</span> from state <span style="font-family:var(--font-mono);">s</span>?</em> &mdash; proposing candidates, predicting their consequences through a world model, and committing to the one with the highest expected progress. <strong style="color:#34a292;">SiRA</strong> realizes this with three modules: an <em>encoder</em> that produces a natural-language belief state, a <em>planner</em> (policy + world model + critic) that simulates and scores candidate futures, and an <em>actor</em> that grounds the chosen abstract action into an environment command.
       </p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:0 0 1.75rem;">
@@ -133,7 +130,7 @@
       </div>
 
       <img src="figures/2-intro-world-model.png" alt="Hierarchical planning: the world model simulates over abstract actions in natural language, while the actor grounds the chosen intention into a concrete environment command." style="width:80%;display:block;margin:1.75rem auto 0;" />
-      <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:center;">Without access to the ground-truth world state or environment, the agent relies on a <em>world model</em> to simulate consequences. SiRA separates <em>simulated actions</em> <em>a<sub>t</sub><sup>′</sup></em> (abstract intentions used for planning) from <em>concrete actions</em> <em>a<sub>t</sub></em> (executed in the environment), enabling transfer and hierarchical planning over more diverse, grounded actions.</p>
+      <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:left;">The world model lets the agent simulate consequences without a ground-truth environment. SiRA separates abstract <em>simulated actions</em> <em>a<sub>t</sub><sup>′</sup></em> used for planning from <em>concrete actions</em> <em>a<sub>t</sub></em> executed in the environment, enabling transfer and hierarchical planning.</p>
 
     </div>
   </section>
@@ -143,33 +140,37 @@
   <section class="section section-gray" id="implementation">
     <div class="container">
       <h2 class="section-title">Implementation</h2>
-      <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 1.5rem;text-align:center;max-width:780px;margin-left:auto;margin-right:auto;">
-        We instantiate SiRA as a web-browsing agent, with each module realized by a pretrained LLM. Two design choices &mdash; concept-based belief states and hierarchical planning &mdash; keep simulation tractable and transferable across tasks.
+      <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 1.5rem;text-align:left;">
+        We instantiate SiRA as a web-browsing agent. Three design choices shape how it works in practice.
       </p>
 
-      <!-- Two side-by-side boxes: Concept-Based Belief States & Hierarchical Planning -->
+      <!-- Design-choice box: World Model Simulation (full width, emphasized) -->
+      <div style="padding:1.1rem 1.2rem;background:white;border:1.5px solid #c8e8e3;border-radius:10px;margin-bottom:1rem;">
+        <p style="font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#34a292;margin:0 0 0.4rem;">Simulative Reasoning with a World Model</p>
+        <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">Instead of committing to the first sampled action, SiRA simulates the consequences of multiple candidates and commits to the one with the highest expected progress. The architecture is model-agnostic; here we <strong>use a pretrained LLM as the world model</strong>, predicting in natural-language belief space &mdash; repurposing the next-token-prediction objective LLMs already excel at for general-purpose simulation, without per-environment training.</p>
+      </div>
+
+      <!-- Two side-by-side design-choice boxes: Concept-Based Belief States & Hierarchical Planning -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
         <div style="padding:1.1rem 1.2rem;background:white;border:1.5px solid #c8e8e3;border-radius:10px;">
           <p style="font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#34a292;margin:0 0 0.4rem;">Concept-Based Belief States</p>
-          <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">The encoder LLM summarizes the browser's accessibility-tree observation into a discrete natural-language belief, which is appended to a selective memory of past summaries and chosen actions. This concept-level factorization lets policy, world model, and critic reason over structured components instead of noisy continuous embeddings &mdash; reducing hallucination and improving robustness.</p>
+          <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">The encoder LLM summarizes the page's accessibility tree into a discrete natural-language belief, appended to a selective memory of past summaries and chosen actions &mdash; reducing hallucination over noisy continuous embeddings.</p>
         </div>
         <div style="padding:1.1rem 1.2rem;background:white;border:1.5px solid #c8e8e3;border-radius:10px;">
           <p style="font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#34a292;margin:0 0 0.4rem;">Hierarchical Planning</p>
-          <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">The policy and world model operate over <em>abstract</em> simulated actions <em>a<sub>t</sub><sup>′</sup></em> &mdash; intentions expressed in natural language (e.g.&nbsp;&ldquo;refine the search to direct flights&rdquo;) &mdash; while a separate actor translates the chosen intention into a concrete browser command. Decoupling planning from execution improves transfer across action spaces and reduces error accumulation over long horizons.</p>
+          <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">Policy and world model reason over <em>abstract</em> intentions in natural language (e.g.&nbsp;&ldquo;refine search to direct flights&rdquo;); the actor translates the chosen intention into a concrete browser command &mdash; improving transfer and reducing error accumulation.</p>
         </div>
       </div>
 
-      <!-- LLM Modules & Search box (Stage-2-style) -->
-      <div style="padding:1.2rem;background:white;border:1.5px solid #c8e8e3;border-radius:10px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div>
-            <p style="font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#34a292;margin:0 0 0.4rem;">LLM Modules</p>
-            <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">Five components &mdash; encoder <em>h</em>, policy <em>π̃</em>, world model <em>f</em>, critic <em>v</em>, actor <em>α</em> &mdash; are each implemented by prompting a pretrained LLM (<code style="font-family:var(--font-mono);font-size:0.9em;background:#f4f6f8;padding:0.05rem 0.3rem;border-radius:3px;">gpt-4o</code> in our experiments). Belief states and simulated actions live in natural language throughout.</p>
-          </div>
-          <div>
-            <p style="font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#34a292;margin:0 0 0.4rem;">Planning &amp; Search</p>
-            <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">At each step the planner samples <strong>M&nbsp;=&nbsp;20</strong> candidate actions, predicts the next state for each, and scores it with <strong>N&nbsp;=&nbsp;20</strong> critic calls. Tree search uses depth-first search via the <a href="https://github.com/maitrix-org/llm-reasoners" style="color:#34a292;text-decoration:none;border-bottom:1px solid #c8e8e3;">LLM Reasoners</a> library, with planning horizon <em>T′&nbsp;=&nbsp;t+1</em>. Each episode runs up to 30 actions or until the agent returns an answer.</p>
-          </div>
+      <!-- LLM Modules and Planning & Search as separate frames -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="padding:1.1rem 1.2rem;background:white;border:1.5px solid #c8e8e3;border-radius:10px;">
+          <p style="font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#34a292;margin:0 0 0.4rem;">LLM Modules</p>
+          <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">Encoder <em>h</em>, policy <em>π̃</em>, world model <em>f</em>, critic <em>v</em>, and actor <em>α</em> are each implemented by prompting a pretrained LLM (<code style="font-family:var(--font-mono);font-size:0.9em;background:#f4f6f8;padding:0.05rem 0.3rem;border-radius:3px;">gpt-4o</code> in our experiments).</p>
+        </div>
+        <div style="padding:1.1rem 1.2rem;background:white;border:1.5px solid #c8e8e3;border-radius:10px;">
+          <p style="font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#34a292;margin:0 0 0.4rem;">Planning &amp; Search</p>
+          <p style="font-size:1rem;color:#5a6a7a;margin:0;line-height:1.5;">DFS via <a href="https://github.com/maitrix-org/llm-reasoners" style="color:#34a292;text-decoration:none;border-bottom:1px solid #c8e8e3;">LLM Reasoners</a> with <strong>M&nbsp;=&nbsp;N&nbsp;=&nbsp;20</strong> samples per step and planning horizon <em>T′&nbsp;=&nbsp;t+1</em>; each episode runs up to 30 actions.</p>
         </div>
       </div>
 
@@ -212,7 +213,7 @@
       </div>
 
       <img src="figures/3-results-overview.png" alt="Task completion rate by reasoning method across three task categories" style="width:80%;display:block;margin:0 auto;" />
-      <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:center;">Task completion rate by reasoning method across the three task categories. Simulative reasoning (System&nbsp;II) consistently outperforms both the matched reactive policy (System&nbsp;I) and a representative open-web agent, with up to 124% relative improvement.</p>
+      <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:left;">Task completion rate by reasoning method across the three task categories. Simulative reasoning (System&nbsp;II) consistently outperforms both the matched reactive policy (System&nbsp;I) and a representative open-web agent, with up to 124% relative improvement.</p>
 
       <!-- Compositional Robustness sub-section -->
       <div style="margin-top:3.5rem;">
@@ -222,7 +223,7 @@
           On FlightQA we vary the number of user constraints from 3 to 8. Simulative reasoning maintains a consistent advantage over the reactive baseline at every complexity level, indicating that the benefit comes from <em>generalizable counterfactual evaluation</em> rather than memorized task-specific patterns.
         </p>
         <img src="figures/3.1-reasoning-analysis.jpg" alt="Completion rate vs. number of constraints in FlightQA, showing persistent gap between simulative reasoning and reactive policy" style="width:64%;display:block;margin:0 auto;" />
-        <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:center;">Completion rate as a function of constraint count on FlightQA. The persistent gap between simulative reasoning (System&nbsp;II) and the reactive policy (System&nbsp;I) holds as compositional complexity increases.</p>
+        <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:left;">Completion rate as a function of constraint count on FlightQA. The persistent gap between simulative reasoning (System&nbsp;II) and the reactive policy (System&nbsp;I) holds as compositional complexity increases.</p>
       </div>
 
     </div>

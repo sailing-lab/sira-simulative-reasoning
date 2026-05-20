@@ -59,10 +59,10 @@
   <section class="section" id="overview" style="padding-top:4rem;">
     <div class="container">
       <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 1.25rem;">
-        Today's agentic systems &mdash; prompted workflows, end-to-end policies, even reasoning LLMs like o1 and o3-mini &mdash; pick the next action <strong>reactively</strong>, with at most undifferentiated chain-of-thought. We argue that <strong style="color:#34a292;">simulative reasoning</strong> through a world model is a more general planning mechanism: at each step the agent proposes candidate actions, predicts their consequences, and commits to the one with the highest expected goal progress &mdash; transferring across tasks without per-environment re-engineering.
+        Today's agentic systems &mdash; prompted workflows, end-to-end policies, even reasoning LLMs like o1 and o3-mini &mdash; pick the next action <strong>reactively</strong>, with at most undifferentiated chain-of-thought. We argue that <strong style="color:#34a292;">simulative reasoning</strong> &mdash; <em>the ability to internally model future states resulting from candidate actions, evaluate their consequences, and select behavior grounded in these predictions</em> &mdash; is a more general planning mechanism that, by operating through a world model rather than memorized responses, transfers across tasks without per-environment re-engineering.
       </p>
       <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 2rem;">
-        We instantiate this idea as <strong style="color:#34a292;">SiRA</strong> (Simulative Reasoning Architecture), a web-browsing agent that uses a pretrained LLM as the world model in natural-language belief space. Simulative reasoning delivers up to <strong>124% higher task completion</strong> than a matched reactive baseline and raises constrained-navigation success from <strong>0% to 32.2%</strong>, with the advantage persisting across three qualitatively distinct task categories.
+        We instantiate this idea as <strong style="color:#34a292;">SiRA</strong> (Simulative Reasoning Architecture), a goal-oriented, model-agnostic architecture that realizes simulative reasoning via an LLM-based world model over natural-language belief states. Evaluated as a web-browsing agent, simulative reasoning delivers up to <strong>124% higher task completion</strong> than a matched reactive baseline and raises constrained-navigation success from <strong>0% to 32.2%</strong>, with the advantage persisting across three qualitatively distinct task categories.
       </p>
       <img src="figures/2.3.1-am-architecture-d2.png" alt="SiRA architecture: encoder produces a natural-language belief state; planner proposes actions, simulates next states via world model, scores with critic; actor outputs concrete action." style="width:64%;display:block;margin:0 auto;" />
       <p class="figure-caption" style="border-top:none;font-size:1.0rem;text-align:left;">SiRA at each step: the <em>encoder</em> maps the observation into a natural-language belief state; the <em>planner</em> proposes candidate actions, simulates their consequences via the <em>world model</em>, and evaluates goal progress via the <em>critic</em>; the best simulated action is then grounded by the <em>actor</em> as a concrete environment command.</p>
@@ -99,7 +99,7 @@
     <div class="container">
       <h2 class="section-title">How SiRA Works</h2>
       <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 2rem;">
-        Where reactive policies pattern-match the next action from the current observation, <strong>simulative reasoning</strong> asks <em>what would happen if I took action <span style="font-family:var(--font-mono);">a</span> from state <span style="font-family:var(--font-mono);">s</span>?</em> &mdash; proposing candidates, predicting their consequences through a world model, and committing to the one with the highest expected progress. <strong style="color:#34a292;">SiRA</strong> realizes this with three modules: an <em>encoder</em> that produces a natural-language belief state, a <em>planner</em> (policy + world model + critic) that simulates and scores candidate futures, and an <em>actor</em> that grounds the chosen abstract action into an environment command.
+        Where reactive policies pattern-match the next action from the current observation, <strong>simulative reasoning</strong> is <em>the ability to internally model future states resulting from candidate actions, evaluate their consequences, and select behavior grounded in these predictions</em>. <strong style="color:#34a292;">SiRA</strong> realizes this with three modules: an <em>encoder</em> that produces a natural-language belief state, a <em>planner</em> (policy + world model + critic) that simulates candidate futures and scores them against the goal, and an <em>actor</em> that grounds the chosen abstract action into an environment command.
       </p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:0 0 1.75rem;">
@@ -141,7 +141,7 @@
     <div class="container">
       <h2 class="section-title">Implementation</h2>
       <p style="font-family:var(--font-serif);font-size:1rem;line-height:1.85;color:#1a1a2e;margin:0 0 1.5rem;text-align:left;">
-        We instantiate SiRA as a web-browsing agent. Three design choices shape how it works in practice.
+        SiRA is model-agnostic; for our experiments we realize it as a web-browsing agent. Three design choices shape how it works in practice.
       </p>
 
       <!-- Design-choice box: World Model Simulation (full width, emphasized) -->

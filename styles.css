@@ -920,3 +920,67 @@ body {
 .footer strong { color: #7dd8ca; /* was: #ADE8F4 */ font-family: var(--font-serif); }
 .footer-sub { margin-top: 0.35rem; font-size: 0.78rem; color: #52699F; /* was: #4A7A94 */ }
 .footer-copy { margin-top: 1rem; font-size: 0.72rem; color: #3d5a6e; }
+
+/* ============================================================
+   SiRA hero flip: dark surface using ONLY SR²AM palette colors.
+   Body keeps the SR²AM palette unchanged; just the hero is inverted
+   so visitors get an immediate distinguishing first impression.
+   Colors used here: #111e30 (footer dark), #284269 (--blue-deep),
+   #52699F (--blue-mid), #34a292 (--blue-teal), #7ad8ca (--blue-light),
+   #ecfaf8 (--blue-pale), #c8e8e3 (--border), #3d5a6e (footer-copy).
+   ============================================================ */
+.hero {
+  background: linear-gradient(160deg, #111e30 0%, #284269 100%);
+  border-bottom: 1px solid rgba(199, 232, 227, 0.18);
+}
+.hero::before {
+  background: radial-gradient(circle, rgba(122, 216, 202, 0.22) 0%, transparent 70%);
+}
+.hero::after {
+  background: radial-gradient(circle, rgba(82, 105, 159, 0.20) 0%, transparent 70%);
+}
+.hero-title-glow {
+  background: radial-gradient(ellipse at center,
+    rgba(122, 216, 202, 0.28) 0%,
+    rgba(82, 105, 159, 0.14) 45%,
+    transparent 70%);
+}
+
+/* Hero text colors flipped for dark background (palette unchanged) */
+.hero .paper-title { color: #ecfaf8; }
+.hero .title-accent-gradient {
+  background: linear-gradient(135deg, #5dbbac 0%, #7088ba 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero .authors { color: #7ad8ca; }
+.hero .authors span { color: #ecfaf8; }
+.hero .author-sup { color: #34a292; }
+.hero .sep { color: #3d5a6e; }
+.hero .affil-line { color: #7ad8ca; }
+.hero .affil-line sup { color: #34a292; }
+
+/* Hero buttons re-skinned for dark background */
+.hero .btn-primary {
+  background: #34a292;
+  color: #111e30;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.30);
+}
+.hero .btn-primary:hover {
+  opacity: 0.95;
+  box-shadow: 0 3px 12px rgba(52,162,146,0.45);
+  transform: translateY(-1px);
+}
+.hero .btn-secondary {
+  background: rgba(255,255,255,0.07);
+  color: #ecfaf8;
+  border: 1px solid rgba(199, 232, 227, 0.28);
+  box-shadow: none;
+}
+.hero .btn-secondary:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: #34a292;
+  color: #ffffff;
+  transform: translateY(-1px);
+}

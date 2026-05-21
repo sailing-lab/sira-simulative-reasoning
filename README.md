@@ -10,7 +10,7 @@ Evaluated as a web-browsing agent, simulative reasoning delivers up to **124% hi
 
 ## Links
 
-- Project page: <https://sira-simulative-reasoning.github.io>
+- Project page: <https://sailing-lab.github.io/sira-simulative-reasoning>
 - Paper: <https://arxiv.org/abs/2507.23773>
 - Code: <https://github.com/sailing-lab/sira>
 
